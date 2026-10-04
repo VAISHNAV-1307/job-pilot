@@ -1,0 +1,24 @@
+name: jobpilot
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: jobpilot-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-jobpilot}
+      POSTGRES_USER: ${DB_USER:-jobpilot}
+      POSTGRES_PASSWORD: ${DB_PASS:?DB_PASS is required - set it in .env}
+    ports:
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-jobpilot} -d ${DB_NAME:-jobpilot}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  postgres-data:
